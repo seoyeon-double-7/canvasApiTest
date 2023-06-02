@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas
+      id="canvas"
+      width="400"
+      height="400"
+      style="background-color: rgb(220, 238, 238)"
+    ></canvas>
+  </body>
+  <script>
+    // 캔바스 오브젝트 추가
+    var canvas = document.getElementById("canvas");
+
+    // 2d drawing object 추가
+    var ctx = canvas.getContext("2d");
+
+    // 캔바스 높이를 이용해서 시계 radius 계산하기
+    var radius = canvas.height / 2;
+
+    // 캔바스 중앙에 ctx 배치
+    ctx.translate(radius, radius);
+
+    // 시계 radius 90% 줄여서 캔버스 내부에 시계 그리기
+    radius = radius * 0.9;
+    // drawClock();
+
+    // 1초마다 시계 새로 그려주기
+    setInterval(drawClock, 1000);
+
+    function drawClock() {
+      // 시계 그려주기
+      drawFace(ctx, radius);
+      drawNumbers(ctx, radius);
+      drawTime(ctx, radius);
+    }
+
+    function drawFace(ctx, radius) {
+      var grad;
+
+      //   흰색 원 그리기
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = "white";
+      ctx.fill();
+
+      //   그라데이션 넣어주기
+      grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
+      grad.addColorStop(0, "#333");
+      grad.addColorStop(0.5, "white");
+      grad.addColorStop(1, "#333");
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = radius * 0.1;
+      ctx.stroke();
+
+      //   시계 중앙 원 그리기
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.1, 0, 2 * Math.PI);
+      ctx.fillStyle = "#333";
+      ctx.fill();
+    }
+
+    function drawNumbers(ctx, radius) {
+      var ang;
+      var num;
+
+      //   폰트 사이즈
+      ctx.font = radius * 0.15 + "px arial";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+
+      //   시계 85% 포지션에 시 그려주기
+      for (num = 1; num < 13; num++) {
+        // 시가 그려질 각도 조정
+        ang = (num * Math.PI) / 6;
+        ctx.rotate(ang);
+        ctx.translate(0, -radius * 0.85);
+        ctx.rotate(-ang);
+        ctx.fillText(num.toString(), 0, 0);
+        ctx.rotate(ang);
+        ctx.translate(0, radius * 0.85);
+        ctx.rotate(-ang);
+      }
+    }
+
+    function drawTime(ctx, radius) {
+      // 현재 시, 분, 초 구하기
+      var now = new Date();
+      var hour = now.getHours();
+      var minute = now.getMinutes();
+      var second = now.getSeconds();
+
+      //hour 계산하고, drawHand로 시침 그려주기
+      hour = hour % 12;
+      hour =
+        (hour * Math.PI) / 6 +
+        (minute * Math.PI) / (6 * 60) +
+        (second * Math.PI) / (360 * 60);
+      drawHand(ctx, hour, radius * 0.5, radius * 0.07);
+
+      //minute
+      minute = (minute * Math.PI) / 30 + (second * Math.PI) / (30 * 60);
+      drawHand(ctx, minute, radius * 0.8, radius * 0.07);
+
+      // second
+      second = (second * Math.PI) / 30;
+      drawHand(ctx, second, radius * 0.9, radius * 0.02);
+    }
+
+    function drawHand(ctx, pos, length, width) {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.moveTo(0, 0);
+      ctx.rotate(pos);
+      ctx.lineTo(0, -length);
+      ctx.stroke();
+      ctx.rotate(-pos);
+    }
+  </script>
+</html>
